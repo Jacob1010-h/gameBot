@@ -1,6 +1,5 @@
 import numpy as np
 from prettytable import PrettyTable
-from rich.console import Console
 from scipy.signal import convolve2d
 
 board_np = np.zeros((6, 7))
@@ -10,8 +9,6 @@ board_np = np.zeros((6, 7))
 SEPARATOR = "\n-------------------------\n"
 
 p = PrettyTable()
-
-console = Console()
 
 SIZE = board_np.shape
 SIZE_ROW = SIZE[0]
