@@ -16,11 +16,13 @@ def printToConsole(input):
     print(LINE)
     print("\n")
 
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 HELP = os.getenv('DISCORD_COIN_HELP')
 LINE = os.getenv('CONSOLE_LINE')
-    
+
+
 @commands.command()
 async def flipHelp(ctx):
     help = HELP
@@ -28,7 +30,8 @@ async def flipHelp(ctx):
     input = f'{author} required assistance with coin bot.'
     printToConsole(input)
     await ctx.send(help)
-    
+
+
 @commands.command(name='flip', pass_context=True)
 async def flip(ctx, number=None):
     heads_tails = ['Heads', 'Tails']
@@ -58,7 +61,8 @@ async def flip_many(ctx, author, number, choice):
         await asyncio.sleep(0.025)
         await ctx.send(flipResult)        
     printToConsole('\n'.join(coinFlipsInput))
-    
+
+
 def setup(bot):
     bot.add_command(flipHelp)
     bot.add_command(flip_many)

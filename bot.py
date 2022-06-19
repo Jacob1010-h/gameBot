@@ -14,6 +14,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 HELP = os.getenv('DISCORD_HELP')
 WRONG_MODE = os.getenv('DISCORD_WRONG_MODE')
 LINE = os.getenv('CONSOLE_LINE')
+COIN_ACTIVATION = os.getenv('COIN_BOT_ACTIVATION_HELP')
 
 
 def print_to_c(imp):
@@ -26,14 +27,15 @@ def print_to_c(imp):
     print("\n")
 
 
-bot = commands.Bot(command_prefix='!', case_insensitive=True, help_command=None)
-bot.coin_bot = 0
+bot = commands.Bot(command_prefix='!', case_insensitive=True)
+# bot.coin_bot = 0
 
 
 @bot.event
 async def on_ready():
     imp = f'{bot.user.name} has connected to Discord!'
     print_to_c(imp)
+    bot.load_extension("cogs.modes")
 
 
 @bot.event
@@ -52,28 +54,35 @@ async def shutdown(ctx):
     exit()
 
 
-@bot.command()
-async def help(ctx):
-    help = HELP
-    author = ctx.author
-    inp = f'{author} required assistance with game bot.'
-    print_to_c(inp)
-    await ctx.send(help)
+# @bot.command()
+# async def connect_for_test(ctx):
+#     bot.load_extension("connectFour")
 
 
-@bot.command()
-async def flipMode(ctx):
-    if bot.coin_bot == 0:
-        await ctx.send("Transfering user to Coin Bot...")
-        bot.load_extension("coinFlipBot")
-        if bot.extensions is not None:
-            await ctx.channel.purge(limit=2)
-            await ctx.send("```Coin Bot activated```")
-            author = ctx.author
-            print_to_c(f"Coin Bot has been activated by {author}!")
-            bot.coin_bot = 1
+@bot.command(pass_context=True)
+@commands.is_owner()
+async def clear(ctx, amount=5):
+    if amount == -00:
+        await ctx.channel.purge()
     else:
-        await ctx.send("```Coin Bot is currently running```")
+        await ctx.channel.purge(limit=amount)
 
+
+# @bot.command()
+# async def flip_mode(ctx):
+#     """
+#     Type !flip_mode to activate the coin bot and to run its commands.
+#     """
+#     if bot.coin_bot == 0:
+#         await ctx.send("Transfering user to Coin Bot...")
+#         bot.load_extension("coinFlipBot")
+#         if bot.extensions is not None:
+#             await ctx.channel.purge(limit=2)
+#             await ctx.send("```Coin Bot activated```")
+#             author = ctx.author
+#             print_to_c(f"Coin Bot has been activated by {author}!")
+#             bot.coin_bot = 1
+#     else:
+#         await ctx.send("```Coin Bot is currently running```")
 
 bot.run(TOKEN)

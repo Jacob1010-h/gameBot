@@ -35,7 +35,6 @@ def print_board():
         p.add_row(row)
     p.header = False
     p.border = True
-    p.attributes
     p.padding_width = 1
     p.horizontal_char = "="
     p.float_format = "0.0"
