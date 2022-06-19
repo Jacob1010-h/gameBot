@@ -8,12 +8,12 @@ class Modes(commands.Cog):
 
     @commands.command()
     async def coin_flip(self, ctx):
-        self.bot.load_extension("coinFlipBot")
+        self.bot.load_extension("cogs.coinFlipBot")
         await ctx.send("```Coin Flip Bot is online!```")
 
     @commands.command()
     async def connect_4(self, ctx):
-        self.bot.load_extension("connectFour")
+        self.bot.load_extension("cogs.connectFour")
         await ctx.send("```Connect Four Bot is online!```")
 
 
