@@ -16,12 +16,12 @@ WRONG_MODE = os.getenv('DISCORD_WRONG_MODE')
 LINE = os.getenv('CONSOLE_LINE')
 
 
-def printToConsole(input):
+def print_to_c(imp):
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     print(LINE)
     print(dt_string)
-    print(input)
+    print(imp)
     print(LINE)
     print("\n")
 
@@ -32,8 +32,8 @@ bot.coin_bot = 0
 
 @bot.event
 async def on_ready():
-    input = f'{bot.user.name} has connected to Discord!'
-    printToConsole(input)
+    imp = f'{bot.user.name} has connected to Discord!'
+    print_to_c(imp)
 
 
 @bot.event
@@ -48,7 +48,7 @@ async def on_command_error(ctx, error):
 @commands.is_owner()
 async def shutdown(ctx):
     await ctx.send("Shutting down...")
-    printToConsole("Shutting down...")
+    print_to_c("Shutting down...")
     exit()
 
 
@@ -56,8 +56,8 @@ async def shutdown(ctx):
 async def help(ctx):
     help = HELP
     author = ctx.author
-    input = f'{author} required assistance with game bot.'
-    printToConsole(input)
+    inp = f'{author} required assistance with game bot.'
+    print_to_c(inp)
     await ctx.send(help)
 
 
@@ -66,11 +66,11 @@ async def flipMode(ctx):
     if bot.coin_bot == 0:
         await ctx.send("Transfering user to Coin Bot...")
         bot.load_extension("coinFlipBot")
-        if bot.extensions != None:
+        if bot.extensions is not None:
             await ctx.channel.purge(limit=2)
             await ctx.send("```Coin Bot activated```")
             author = ctx.author
-            printToConsole(f"Coin Bot has been activated by {author}!")
+            print_to_c(f"Coin Bot has been activated by {author}!")
             bot.coin_bot = 1
     else:
         await ctx.send("```Coin Bot is currently running```")
