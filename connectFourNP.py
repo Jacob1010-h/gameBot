@@ -1,10 +1,11 @@
 import numpy as np
 from prettytable import PrettyTable
 from rich.console import Console
+from scipy.signal import convolve2d
 
-# board_np = np.zeros((6, 7))
-board_np = np.random.randint(3, size=(6, 7))
-# board_np = np.eye(6, 7)
+board_np = np.zeros((6, 7))
+# board_np = np.random.randint(3, size=(6, 7))
+# # board_np = np.eye(6, 7)
 
 SEPARATOR = "\n-------------------------\n"
 
@@ -16,7 +17,20 @@ SIZE = board_np.shape
 SIZE_ROW = SIZE[0]
 SIZE_COL = SIZE[1]
 
-USER_INPUT = "Please input the colum Player %i"
+USER_INPUT = "Please input the colum Player %i\n"
+
+NOT_VALID_INPUT = "Please enter a valid input Player %i\n"
+
+INVALID_MOVE = "Invalid move please try again Player %i\n"
+
+allowed = set("1234567")
+
+# possible wins
+horizontal_kernel = np.array([[1, 1, 1, 1]])
+vertical_kernel = np.transpose(horizontal_kernel)
+diag1_kernel = np.eye(4, dtype=np.uint8)
+diag2_kernel = np.fliplr(diag1_kernel)
+detection_kernels = [horizontal_kernel, vertical_kernel, diag1_kernel, diag2_kernel]
 
 
 def print_board():
@@ -24,6 +38,7 @@ def print_board():
         p.add_row(row)
     p.header = False
     p.border = True
+    p.attributes
     p.padding_width = 1
     p.horizontal_char = "="
     p.float_format = "0.0"
@@ -53,6 +68,29 @@ def fall_edit(player, xi, yi):
                 board_np[xi][yi] = player
 
 
+def is_valid_move(x, y):
+    if 0 < y <= SIZE_COL:
+        if board_np[x, y - 1] == 0:
+            return True
+    return False
+
+
+def use_input(input_col, player):
+    input_col = int(input_col)
+    if is_valid_move(0, input_col):
+        board_np[0, input_col - 1] = player
+    else:
+        print(INVALID_MOVE % player)
+        return False
+
+
+def winning_move(board, player):
+    for kernel in detection_kernels:
+        if (convolve2d(board == player, kernel, mode="valid") == 4).any():
+            return True
+    return False
+
+
 def fall():
     for i in range(0, 2):
         result1, result2 = create_num_arr()
@@ -69,10 +107,28 @@ def fall():
 
 
 def run():
+    player = 1
     print_board()
-    fall()
-    # print(USER_INPUT % 1)
-    # input()
+    while True:
+        print(USER_INPUT % player)
+        var = input()
+        if var and allowed.issuperset(var):
+            if player == 1:
+                use_input(var, 1)
+                fall()
+                if winning_move(board_np, player):
+                    print(f"Player {player} has won!")
+                    break
+                player = 2
+            else:
+                use_input(var, 2)
+                fall()
+                if winning_move(board_np, player):
+                    print(f"Player {player} has won!")
+                    break
+                player = 1
+        else:
+            print(NOT_VALID_INPUT % player)
 
 
 if __name__ == '__main__':
