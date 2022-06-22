@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 import random
 # from bot import print_to_c
+import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -29,10 +30,21 @@ async def flip_many(ctx, author, number, choice):
         response = random.choice(choice)
         coin_input = "     " + f"{i + 1}. " + response
         coin_flips_input.append(coin_input)
-        coin_flips.append(response)
-    for flipResult in coin_flips:
-        await asyncio.sleep(0.025)
-        await ctx.send(flipResult)
+        if response == 'Heads':
+            coin_flips.append(coin_input + ":full_moon:")
+        else:
+            coin_flips.append(coin_input + ":last_quarter_moon:")
+
+    pfp = ctx.author.avatar_url
+    em = discord.Embed(title="**Coin Flips**",
+                       color=ctx.author.color)
+    em.add_field(name=f"{number} Flips",
+                 value='\n'.join(coin_flips))
+    em.set_author(name=f"{ctx.author}",
+                  icon_url=pfp)
+
+    await ctx.message.delete()
+    await ctx.send(embed=em)
     print_to_c('\n'.join(coin_flips_input))
 
 
@@ -50,9 +62,16 @@ class CoinFlip(commands.Cog):
             await flip_many(ctx, author, number, heads_tails)
         else:
             response = random.choice(heads_tails)
+            pfp = ctx.author.avatar_url
             inp = f'{author} flipped a coin!' + "\n     " + "1. " + response
             print_to_c(inp)
-            await ctx.send(response)
+            em = discord.Embed(title=f"**{response}**",
+                               color=ctx.author.color)
+            em.set_author(name=f"{ctx.author}",
+                          icon_url= pfp)
+
+            await ctx.message.delete()
+            await ctx.send(embed=em)
 
 
 def setup(bot):

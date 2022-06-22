@@ -26,6 +26,7 @@ class Owner(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def shutdown(self, ctx):
+        await ctx.message.delete()
         await ctx.send("Shutting down...")
         print_to_c("Shutting down...")
         exit()
@@ -36,6 +37,7 @@ class Owner(commands.Cog):
         if amount == -00:
             await ctx.channel.purge()
         else:
+            await ctx.message.delete()
             await ctx.channel.purge(limit=amount)
 
 

@@ -13,11 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-HELP = os.getenv('DISCORD_HELP')
-WRONG_MODE = os.getenv('DISCORD_WRONG_MODE')
 LINE = os.getenv('CONSOLE_LINE')
-COIN_ACTIVATION = os.getenv('COIN_BOT_ACTIVATION_HELP')
-ID = os.getenv('OWNER_ID')
 
 
 def print_to_c(imp):
@@ -34,9 +30,6 @@ bot = commands.Bot(command_prefix='!', case_insensitive=True)
 bot.remove_command("help")
 
 
-# bot.coin_bot = 0
-
-
 @bot.event
 async def on_ready():
     imp = f'{bot.user.name} has connected to Discord!'
@@ -48,7 +41,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
-        await ctx.send(WRONG_MODE)
+        await ctx.send('This command is not available, please type !help for a list of all possible commands.')
 
 
 @bot.group(name='help', invoke_without_command=True)
@@ -59,10 +52,14 @@ async def _help(ctx):
     if await bot.is_owner(ctx.author):
         em.add_field(name="Moderation",
                      value="clear\nshutdown")
-    em.add_field(name="Games",
-                 value="coin_flip\nconnect_four")
+    em.add_field(name="Games : Activations",
+                 value="coin_flip\nconnect_4")
+    em.add_field(name="Games : Commands",
+                 value="flip\ntest_board")
 
+    await ctx.message.delete()
     await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with the bot.')
 
 
 @_help.command()
@@ -74,7 +71,9 @@ async def clear(ctx):
     em.add_field(name="**Syntax**",
                  value="!clear <number>")
 
+    await ctx.message.delete()
     await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with the clear command.')
 
 
 @_help.command()
@@ -85,29 +84,49 @@ async def shutdown(ctx):
     em.add_field(name="**Syntax**",
                  value="!shutdown")
 
+    await ctx.message.delete()
     await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with the shutdown command.')
 
 
 @_help.command()
 async def coin_flip(ctx):
-    em = discord.Embed(title="Coin Flip Bot Activation",
+    em = discord.Embed(title="Bot Activation : Coin Flip ",
                        description="Activates the Coin Flip Bot, allowing you to flip a coin",
                        color=ctx.author.color)
     em.add_field(name="**Syntax**",
                  value="!coin_flip")
 
+    await ctx.message.delete()
     await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with the coin_flip bot activation')
 
 
 @_help.command()
-async def connect_four(ctx):
-    em = discord.Embed(title="Connect Four Bot Activation",
-                       description="Activates the Connect Four Bot, allowing you to play a game of connect four",
+async def flip(ctx):
+    em = discord.Embed(title="Flip",
+                       description="Flips a coin, giving a result of heads or tails. If a number is specified then it "
+                                   "will flip so many times. To use this command you must activate the coin flip bot.",
                        color=ctx.author.color)
     em.add_field(name="**Syntax**",
-                 value="!connect_four")
+                 value="!flip <number>")
 
+    await ctx.message.delete()
     await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with flipping a coin.')
+
+
+@_help.command()
+async def connect_4(ctx):
+    em = discord.Embed(title="Bot Activation : Connect Four",
+                       description="Activates the Connect Four Bot, allowing you to play a game of connect four.",
+                       color=ctx.author.color)
+    em.add_field(name="**Syntax**",
+                 value="!connect_4")
+
+    await ctx.message.delete()
+    await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with the connect_four bot activation.')
 
 
 bot.run(TOKEN)

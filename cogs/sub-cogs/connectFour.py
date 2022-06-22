@@ -1,3 +1,5 @@
+import asyncio
+
 import numpy as np
 from prettytable import PrettyTable
 from scipy.signal import convolve2d
@@ -5,7 +7,7 @@ from discord.ext import commands
 
 p = PrettyTable()
 
-board_np = np.random.randint(3, size=(6, 7))
+board_np = np.zeros((6, 7))
 
 SIZE = board_np.shape
 SIZE_ROW = SIZE[0]
@@ -17,7 +19,28 @@ NOT_VALID_INPUT = "Please enter a valid input Player %i\n"
 
 INVALID_MOVE = "Invalid move please try again Player %i\n"
 
-allowed = set("1234567")
+allowed = ["1", "2", "3", "4", "5", "6", "7"]
+
+# possible wins
+horizontal_kernel = np.array([[1, 1, 1, 1]])
+vertical_kernel = np.transpose(horizontal_kernel)
+diag1_kernel = np.eye(4, dtype=np.uint8)
+diag2_kernel = np.fliplr(diag1_kernel)
+detection_kernels = [horizontal_kernel, vertical_kernel, diag1_kernel, diag2_kernel]
+
+
+class Player:
+    player = 1
+
+    def __init__(self):
+        self.player = 1
+
+
+async def winning_move(board):
+    for kernel in detection_kernels:
+        if (convolve2d(board == Player.player, kernel, mode="valid") == 4).any():
+            return True
+    return False
 
 
 async def create_num_arr():
@@ -30,6 +53,26 @@ async def create_num_arr():
     l2 = list(zip(l2[0], l2[1]))
     result2 = l2[::-1]
     return result1, result2
+
+
+async def is_valid_move(x, y):
+    if 0 < y <= SIZE_COL:
+        if board_np[x, y - 1] == 0:
+            return True
+    return False
+
+
+async def use_input(ctx, input_col):
+    input_col = int(input_col)
+    if await is_valid_move(0, input_col):
+        board_np[0, input_col - 1] = Player.player
+        if Player.player == 1:
+            Player.player = 2
+        elif Player.player == 2:
+            Player.player = 1
+    else:
+        await ctx.send(INVALID_MOVE % Player.player)
+        return False
 
 
 async def print_board(ctx):
@@ -47,14 +90,14 @@ async def print_board(ctx):
     p.clear()
 
 
-async def fall_edit(player, xi, yi):
+async def fall_edit(pp, xi, yi):
     for i in range(SIZE_ROW - 1):  # loop through board
         if xi != SIZE_ROW - 1:  # if number is at the bottom row
             # move cell down if there is available space
             if board_np[xi + 1][yi] == 0:
                 board_np[xi][yi] = 0
                 xi += 1
-                board_np[xi][yi] = player
+                board_np[xi][yi] = pp
 
 
 async def fall(ctx):
@@ -78,9 +121,50 @@ class ConnectFour(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def test_board(self, ctx):
-        await print_board(ctx)
+    async def move(self, ctx, col=None):
+        await ctx.send(col)
+        await use_input(ctx, col)
         await fall(ctx)
+
+    # @commands.command()
+    # async def start_game(self, ctx):
+    #     await print_board(ctx)
+    #     try:
+    #         while player >= 1:
+    #             await ctx.send(f"Player {player} please input a column by !move <column>.")
+    #             # msg = await self.bot.wait_for(
+    #             #     "message",
+    #             #     timeout=60,
+    #             #     check=lambda message: message.author == ctx.author and message.channel == ctx.channel
+    #             # )
+    #             # if msg and msg.content.lower() in allowed:
+    #             #     await msg.delete()
+    #             #     await ctx.send(f"Player {player} played in column {msg.content}.")
+    #             #     if player == 2:
+    #             #         player = 1
+    #             #     else:
+    #             #         player = 2
+    #             # else:
+    #             #     await ctx.send("Please input a correct value.")
+    #     except asyncio.TimeoutError:
+    #         await ctx.send("Cancelling due to timeout.", delete_after=10)
+
+    @commands.command()
+    async def test_board(self, ctx):
+        try:
+            await print_board(ctx)
+            await ctx.send("Please input a column.")
+            msg = await self.bot.wait_for(
+                "message",
+                timeout=60,
+                check=lambda
+                    message: message.author == ctx.author and message.channel == ctx.channel and message.content in allowed
+            )
+            if msg:
+                await msg.delete()
+                await ctx.send(f"Player 1 would like to go: {msg.content}")
+        except asyncio.TimeoutError:
+            await ctx.send("Cancelling due to timeout.", delete_after=10)
 
 
 def setup(bot):
