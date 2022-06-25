@@ -1,8 +1,5 @@
 # bot.py
-import asyncio
 from datetime import datetime
-from distutils import extension
-from imp import load_compiled
 import os
 
 import discord
@@ -10,6 +7,9 @@ from discord.ext.commands import CommandNotFound
 
 from discord.ext import commands
 from dotenv import load_dotenv
+
+intents = discord.Intents.default()
+intents.members = True
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -26,7 +26,7 @@ def print_to_c(imp):
     print("\n")
 
 
-bot = commands.Bot(command_prefix='!', case_insensitive=True)
+bot = commands.Bot(command_prefix='!', case_insensitive=True, intents=intents)
 bot.remove_command("help")
 
 
@@ -55,7 +55,7 @@ async def _help(ctx):
     em.add_field(name="Games : Activations",
                  value="coin_flip\nconnect_4")
     em.add_field(name="Games : Commands",
-                 value="flip\ntest_board")
+                 value="flip\n")
 
     await ctx.message.delete()
     await ctx.send(embed=em)
