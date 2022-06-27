@@ -1,6 +1,10 @@
 import asyncio
+import os
 
+from datetime import datetime
+import discord
 import numpy as np
+from dotenv import load_dotenv
 from prettytable import PrettyTable
 from scipy.signal import convolve2d
 from discord.ext import commands
@@ -29,6 +33,21 @@ diag2_kernel = np.fliplr(diag1_kernel)
 detection_kernels = [horizontal_kernel, vertical_kernel, diag1_kernel, diag2_kernel]
 
 
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+LINE = os.getenv('CONSOLE_LINE')
+
+
+def print_to_c(imp):
+    now = datetime.now()
+    dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+    print(LINE)
+    print(dt_string)
+    print(imp)
+    print(LINE)
+    print("\n")
+
+
 class Users:
     player1 = None
     player2 = None
@@ -42,11 +61,15 @@ class Player:
     player = 1
     current_player = ""
     temp_last = ""
+    p1moves = []
+    p2moves = []
 
     def __init__(self):
         self.player = 1
         self.current_player = ""
         self.temp_last = ""
+        self.p1moves = []
+        self.p2moves = []
 
 
 async def winning_move(board):
@@ -79,23 +102,58 @@ async def use_input(ctx, input_col):
     input_col = int(input_col)
     if await is_valid_move(0, input_col):
         board_np[0, input_col - 1] = Player.player
+        return True
     else:
         await ctx.send(INVALID_MOVE % Player.player)
         return False
 
 
-async def print_board(ctx):
-    for row in board_np:
+async def print_board_to_c(ctx):
+    result1 = np.where(board_np == 0, " ", board_np)
+    result2 = np.where(board_np == 1, "1", result1)
+    result = np.where(board_np == 2, "2", result2)
+    sep = '+===+===+===+===+===+===+===+'
+    field = '| 1 | 2 | 3 | 4 | 5 | 6 | 7 |'
+    for row in result:
         p.add_row(row)
     p.header = False
     p.border = True
     p.padding_width = 1
     p.horizontal_char = "="
-    p.float_format = "0.0"
-    await ctx.send('```' +
-                   p.get_string() +
-                   '```'
-                   )
+    p.float_format = '.0'
+    movesp1 = str("\n".join(Player.p1moves))
+    movesp2 = str("\n".join(Player.p2moves))
+    print_to_c(sep + "\n" + field + "\n" + p.get_string())
+    p.clear()
+
+
+async def print_board(ctx):
+    result1 = np.where(board_np == 0, " ", board_np)
+    result2 = np.where(board_np == 1, "1", result1)
+    result = np.where(board_np == 2, "2", result2)
+    sep = '+===+===+===+===+===+===+===+'
+    field = '| 1 | 2 | 3 | 4 | 5 | 6 | 7 |'
+    for row in result:
+        p.add_row(row)
+    p.header = False
+    p.border = True
+    p.padding_width = 1
+    p.horizontal_char = "="
+    p.float_format = '.0'
+    movesp1 = str("\n".join(Player.p1moves))
+    movesp2 = str("\n".join(Player.p2moves))
+    # print(movesp1)
+    # print(movesp2)
+    em = discord.Embed(title=f"Player {Player.player}",
+                       description='```' + sep + "\n" + field + "\n" + p.get_string() + '```',
+                       color=ctx.author.color)
+    if len(Player.p1moves) != 0:
+        em.add_field(name="Player 1",
+                     value=movesp1)
+    if len(Player.p2moves) != 0:
+        em.add_field(name="Player 2",
+                     value=movesp2)
+    await ctx.send(embed=em)
     p.clear()
 
 
@@ -134,13 +192,14 @@ class ConnectFour(commands.Cog):
         global board_np
         Users.player1 = ctx.author
         Users.player2 = player2
-        print(Users.player2)
+        # print(Users.player2)
+        await ctx.message.delete()
         await ctx.send("Checking player's two status...")
         if Users.player2 is None:
             await ctx.send("No player 2 given.")
         if Users.player2 is not None:
             Users.player2 = str(await self.bot.fetch_user(Users.player2[2:-1]))
-            print(Users.player2)
+            # print(Users.player2)
             players = []
             for guild in self.bot.guilds:
                 for member in guild.members:
@@ -151,44 +210,43 @@ class ConnectFour(commands.Cog):
 
             if Users.player2 in players:
                 await ctx.send(f"{ctx.author} is starting a game with {Users.player2}")
+                print_to_c(f"{ctx.author} is starting a game with {Users.player2}")
                 board_np = np.zeros((6, 7))
+                await print_board(ctx)
 
     @commands.command()
     async def move(self, ctx, col=None):
         global board_np
         Player.current_player = ctx.author
-        print(Player.current_player, type(Player.current_player))
-        print(Player.temp_last, type(Player.temp_last))
-        if ctx.author == Users.player1 or ctx.author == Users.player2:
-            if str(Player.current_player) != str(Player.temp_last):  # WHY THE FUCK ISNT THIS TRUE
-                await ctx.send(col)
-                await use_input(ctx, col)
-                await fall(ctx)
-                if await winning_move(board_np):
-                    await ctx.send(f"Player {Player.player} has won!")
-                    board_np = np.zeros((6, 7))
-                if Player.player == 1:
-                    Player.player = 2
-                elif Player.player == 2:
-                    Player.player = 1
-                Player.temp_last = Player.current_player
-
-    @commands.command()
-    async def test_board(self, ctx):
-        try:
-            await print_board(ctx)
-            await ctx.send("Please input a column.")
-            msg = await self.bot.wait_for(
-                "message",
-                timeout=60,
-                check=lambda
-                    message: message.author == ctx.author and message.channel == ctx.channel and message.content in allowed
-            )
-            if msg:
-                await msg.delete()
-                await ctx.send(f"Player 1 would like to go: {msg.content}")
-        except asyncio.TimeoutError:
-            await ctx.send("Cancelling due to timeout.", delete_after=10)
+        # print(Player.current_player, type(Player.current_player))
+        # print(Player.temp_last, type(Player.temp_last))
+        # print(f"ctx: {ctx.author}", type(ctx.author))
+        # print(f"p2: {Users.player2}", type(Users.player2))
+        # print(f"p1: {Users.player1}", type(Users.player1))
+        if Users.player2 is not None and Users.player1 is not None:
+            if str(ctx.author) == str(Users.player1) or str(ctx.author) == str(Users.player2):
+                if str(Player.temp_last) != str(Player.current_player):
+                    await ctx.message.delete()
+                    if await use_input(ctx, col):
+                        if Player.player == 1:
+                            Player.p1moves.append(col)
+                        elif Player.player == 2:
+                            Player.p2moves.append(col)
+                        await fall(ctx)
+                        if await winning_move(board_np):
+                            await ctx.send(f"Player {Player.player} has won!")
+                            if Player.player == 1:
+                                print_to_c(f"{Users.player1} has won a game against {Users.player2}!\n")
+                                await print_board_to_c(ctx)
+                            elif Player.player == 2:
+                                print_to_c(f"{Users.player2} has won a game against {Users.player1}!\n")
+                                await print_board_to_c(ctx)
+                            board_np = np.zeros((6, 7))
+                        if Player.player == 1:
+                            Player.player = 2
+                        elif Player.player == 2:
+                            Player.player = 1
+                        Player.temp_last = Player.current_player
 
 
 def setup(bot):

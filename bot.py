@@ -55,7 +55,7 @@ async def _help(ctx):
     em.add_field(name="Games : Activations",
                  value="coin_flip\nconnect_4")
     em.add_field(name="Games : Commands",
-                 value="flip\n")
+                 value="flip\nstart_game, move")
 
     await ctx.message.delete()
     await ctx.send(embed=em)
@@ -127,6 +127,33 @@ async def connect_4(ctx):
     await ctx.message.delete()
     await ctx.send(embed=em)
     print_to_c(f'{ctx.author} needed help with the connect_four bot activation.')
+
+
+@_help.command()
+async def start_game(ctx):
+    em = discord.Embed(title="Start Game",
+                       description="Starts a new game of connect four, overwiting any game that was previously being "
+                                   "played.",
+                       color=ctx.author.color)
+    em.add_field(name="**Syntax**",
+                 value="!start_game @<user>")
+
+    await ctx.message.delete()
+    await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with the starting a connect 4 game.')
+
+
+@_help.command()
+async def move(ctx):
+    em = discord.Embed(title="Move",
+                       description="Makes a move on the active connect four board.",
+                       color=ctx.author.color)
+    em.add_field(name="**Syntax**",
+                 value="!move <column>")
+
+    await ctx.message.delete()
+    await ctx.send(embed=em)
+    print_to_c(f'{ctx.author} needed help with moving a piece in a connect four game.')
 
 
 bot.run(TOKEN)
