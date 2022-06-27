@@ -305,8 +305,6 @@ class ConnectFour(commands.Cog):
                         await fall(ctx)
                         if await winning_move(board_np):
                             await ctx.send(f"Player {Player.player} has won!")
-                            Player.p1moves = []
-                            Player.p2moves = []
                             if Player.player == 1:
                                 print_to_c(f"{Users.player1} has won a game against {Users.player2}!\n")
                                 await print_board_to_c(ctx)
