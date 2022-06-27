@@ -17,6 +17,11 @@ LINE = os.getenv('CONSOLE_LINE')
 
 
 def print_to_c(imp):
+    """
+    It prints a line, the current date and time, the input, another line, and a new line
+    
+    :param imp: The string to be printed
+    """
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     print(LINE)
@@ -39,6 +44,12 @@ async def on_ready():
 
 
 @bot.event
+    """
+    If the command is not found, send a message to the user.
+    
+    :param ctx: The context of where the command was used
+    :param error: The error that was raised
+    """
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
         await ctx.send('This command is not available, please type !help for a list of all possible commands.')

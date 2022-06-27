@@ -1,3 +1,4 @@
+# It's importing all the modules that are needed for the bot to work.
 import asyncio
 import os
 
@@ -25,7 +26,7 @@ INVALID_MOVE = "Invalid move please try again Player %i\n"
 
 allowed = ["1", "2", "3", "4", "5", "6", "7"]
 
-# possible wins
+# It's creating a list of possible wins.
 horizontal_kernel = np.array([[1, 1, 1, 1]])
 vertical_kernel = np.transpose(horizontal_kernel)
 diag1_kernel = np.eye(4, dtype=np.uint8)
@@ -33,12 +34,18 @@ diag2_kernel = np.fliplr(diag1_kernel)
 detection_kernels = [horizontal_kernel, vertical_kernel, diag1_kernel, diag2_kernel]
 
 
+# It's loading the .env file and getting the token and the console line.
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 LINE = os.getenv('CONSOLE_LINE')
 
 
 def print_to_c(imp):
+    """
+    It prints a line, the current date and time, the input, another line, and a new line
+    
+    :param imp: The string to be printed
+    """
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     print(LINE)
@@ -48,6 +55,7 @@ def print_to_c(imp):
     print("\n")
 
 
+# The Users class is a class that has two attributes, player1 and player2, which are both set to None
 class Users:
     player1 = None
     player2 = None
@@ -57,6 +65,8 @@ class Users:
         self.player2 = None
 
 
+# The Player class is used to keep track of the current player, the last player, and the moves of each
+# player.
 class Player:
     player = 1
     current_player = ""
@@ -73,6 +83,12 @@ class Player:
 
 
 async def winning_move(board):
+    """
+    It checks if there are any 4-in-a-rows in the board
+    
+    :param board: The board to check for a winning move
+    :return: a boolean value.
+    """
     for kernel in detection_kernels:
         if (convolve2d(board == Player.player, kernel, mode="valid") == 4).any():
             return True
@@ -80,6 +96,10 @@ async def winning_move(board):
 
 
 async def create_num_arr():
+    """
+    It takes a 2D array and returns two lists of tuples, where each tuple is a flipped version of itself
+    :return: a tuple of two lists.
+    """
     # list 1
     l1 = np.where(board_np == 1)
     l1 = list(zip(l1[0], l1[1]))
@@ -92,6 +112,13 @@ async def create_num_arr():
 
 
 async def is_valid_move(x, y):
+    """
+    If the column is valid and the space is empty, return True, otherwise return False
+    
+    :param x: the row number of the board
+    :param y: the column number
+    :return: The function is_valid_move() is returning a boolean value.
+    """
     if 0 < y <= SIZE_COL:
         if board_np[x, y - 1] == 0:
             return True
@@ -99,6 +126,13 @@ async def is_valid_move(x, y):
 
 
 async def use_input(ctx, input_col):
+    """
+    If the move is valid, then the player's move is added to the board
+    
+    :param ctx: The context of the message
+    :param input_col: The column the player wants to drop their piece in
+    :return: a boolean value.
+    """
     input_col = int(input_col)
     if await is_valid_move(0, input_col):
         board_np[0, input_col - 1] = Player.player
@@ -109,6 +143,12 @@ async def use_input(ctx, input_col):
 
 
 async def print_board_to_c(ctx):
+    """
+    It takes the board_np array, replaces the 0's with spaces, the 1's with 1's, and the 2's with 2's.
+    Then it prints the board to the console.
+    
+    :param ctx: The context of the message
+    """
     result1 = np.where(board_np == 0, " ", board_np)
     result2 = np.where(board_np == 1, "1", result1)
     result = np.where(board_np == 2, "2", result2)
@@ -128,6 +168,11 @@ async def print_board_to_c(ctx):
 
 
 async def print_board(ctx):
+    """
+    It prints the board in a nice way.
+    
+    :param ctx: The context of the command
+    """
     result1 = np.where(board_np == 0, " ", board_np)
     result2 = np.where(board_np == 1, "1", result1)
     result = np.where(board_np == 2, "2", result2)
@@ -158,6 +203,14 @@ async def print_board(ctx):
 
 
 async def fall_edit(pp, xi, yi):
+    """
+    If the cell is not at the bottom row, and the cell below it is empty, then move the cell down one
+    row.
+    
+    :param pp: the number that is being moved
+    :param xi: x index of the cell
+    :param yi: column
+    """
     for i in range(SIZE_ROW - 1):  # loop through board
         if xi != SIZE_ROW - 1:  # if number is at the bottom row
             # move cell down if there is available space
@@ -168,6 +221,11 @@ async def fall_edit(pp, xi, yi):
 
 
 async def fall(ctx):
+    """
+    It creates two arrays of random numbers, then edits the board with those numbers.
+    
+    :param ctx: The context of the message
+    """
     for i in range(0, 2):
         result1, result2 = await create_num_arr()
         # separate x and y
@@ -188,6 +246,12 @@ class ConnectFour(commands.Cog):
         self.bot = bot
 
     @commands.command()
+        """
+        It takes a user's ID and checks if it's a valid user. If it is, it starts a game.
+        
+        :param ctx: The context of the command
+        :param player2: The player that the user wants to play with
+        """
     async def start_game(self, ctx, player2=None):
         global board_np
         Users.player1 = ctx.author
@@ -215,6 +279,12 @@ class ConnectFour(commands.Cog):
                 await print_board(ctx)
 
     @commands.command()
+        """
+        It's a command that allows players to play a game of connect 4.
+        
+        :param ctx: The context of the message
+        :param col: The column the player wants to drop their piece in
+        """
     async def move(self, ctx, col=None):
         global board_np
         Player.current_player = ctx.author
@@ -252,4 +322,9 @@ class ConnectFour(commands.Cog):
 
 
 def setup(bot):
+    """
+    It adds the cog to the bot
+    
+    :param bot: The bot object
+    """
     bot.add_cog(ConnectFour(bot))

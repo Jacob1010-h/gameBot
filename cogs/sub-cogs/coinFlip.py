@@ -1,3 +1,4 @@
+# Importing the modules that are needed for the cog to work.
 import asyncio
 import os
 from datetime import datetime
@@ -12,6 +13,11 @@ LINE = os.getenv('CONSOLE_LINE')
 
 
 def print_to_c(imp):
+    """
+    It prints a line, the current date and time, the input, another line, and a new line
+    
+    :param imp: The string to be printed
+    """
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     print(LINE)
@@ -22,6 +28,14 @@ def print_to_c(imp):
 
 
 async def flip_many(ctx, author, number, choice):
+    """
+    It takes a user's input, and then flips a coin that many times.
+    
+    :param ctx: The context of the command
+    :param author: The author of the message
+    :param number: The number of coins to flip
+    :param choice: This is the list of choices that the bot will choose from
+    """
     num = int(number)
     inp = f'{author} flipped many coins!'
     coin_flips_input = [inp]
@@ -54,6 +68,13 @@ class CoinFlip(commands.Cog):
         self.bot = bot
 
     @commands.command(name='flip', pass_context=True)
+        """
+        It takes a number and a list of strings, and returns a list of strings with the same length as the
+        number
+        
+        :param ctx: The context of the command
+        :param number: The number of times you want to flip the coin
+        """
     async def flip(self, ctx, number=None):
         heads_tails = ['Heads', 'Tails']
         author = ctx.author
@@ -75,4 +96,9 @@ class CoinFlip(commands.Cog):
 
 
 def setup(bot):
+    """
+    It adds the cog to the bot
+    
+    :param bot: The bot object
+    """
     bot.add_cog(CoinFlip(bot))
