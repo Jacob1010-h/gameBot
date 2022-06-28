@@ -3,7 +3,6 @@ import asyncio
 import os
 from datetime import datetime
 import random
-# from bot import print_to_c
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -13,6 +12,11 @@ LINE = os.getenv('CONSOLE_LINE')
 
 
 def print_to_c(imp):
+    """
+    It prints a line, the current date and time, the input, another line, and a new line
+    
+    :param imp: The string to be printed
+    """
     now = datetime.now()
     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
     print(LINE)
@@ -23,6 +27,14 @@ def print_to_c(imp):
 
 
 async def flip_many(ctx, author, number, choice):
+    """
+    It takes a user's input, and then flips a coin that many times.
+    
+    :param ctx: The context of the command
+    :param author: The author of the message
+    :param number: The number of coin flips
+    :param choice: This is the list of choices that the bot will choose from
+    """
     num = int(number)
     inp = f'{author} flipped many coins!'
     coin_flips_input = [inp]
@@ -52,10 +64,21 @@ async def flip_many(ctx, author, number, choice):
 class CoinFlip(commands.Cog):
 
     def __init__(self, bot):
+        """
+        It initializes the cog
+        
+        :param bot: The bot object
+        """
         self.bot = bot
 
     @commands.command(name='flip', pass_context=True)
     async def flip(self, ctx, number=None):
+        """
+        It flips a coin and returns the result.
+        
+        :param ctx: The context of the command
+        :param number: The number of times to flip the coin
+        """
         heads_tails = ['Heads', 'Tails']
         author = ctx.author
 
@@ -76,4 +99,9 @@ class CoinFlip(commands.Cog):
 
 
 def setup(bot):
+    """
+    It adds the cog to the bot
+    
+    :param bot: The bot object
+    """
     bot.add_cog(CoinFlip(bot))
