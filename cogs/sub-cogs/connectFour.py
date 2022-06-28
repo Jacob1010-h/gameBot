@@ -325,6 +325,8 @@ class ConnectFour(commands.Cog):
                                 print_to_c(f"{Users.player2} has won a game against {Users.player1}!\n")
                                 await print_board_to_c(ctx)
                             board_np = np.zeros((6, 7))
+                            Player.p1moves = []
+                            Player.p2moves = []
                         if Player.player == 1:
                             Player.player = 2
                         elif Player.player == 2:

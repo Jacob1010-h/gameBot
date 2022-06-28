@@ -27,6 +27,11 @@ def print_to_c(imp):
 class Modes(commands.Cog):
 
     def __init__(self, bot):
+        """
+        It initializes the cog
+        
+        :param bot: The bot object
+        """
         self.bot = bot
 
     @commands.command()
