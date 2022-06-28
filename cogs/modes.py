@@ -24,12 +24,6 @@ class Modes(commands.Cog):
         self.bot = bot
 
     @commands.command()
-        """
-        It loads the coinFlip.py file and then sends a message to the channel saying that the bot is
-        online.
-        
-        :param ctx: The context of where the command was used
-        """
     async def coin_flip(self, ctx):
         self.bot.load_extension("cogs.sub-cogs.coinFlip")
         await ctx.message.delete()
@@ -37,12 +31,6 @@ class Modes(commands.Cog):
         print_to_c("Coin Flip Bot is online!")
 
     @commands.command()
-        """
-        It loads the connectFour.py file and then sends a message to the channel saying that the bot is
-        online.
-        
-        :param ctx: The context of where the command was used
-        """
     async def connect_4(self, ctx):
         self.bot.load_extension("cogs.sub-cogs.connectFour")
         await ctx.message.delete()
