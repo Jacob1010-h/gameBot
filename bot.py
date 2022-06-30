@@ -186,7 +186,7 @@ async def start_game(ctx):
     :param ctx: The context of where the command was used
     """
     em = discord.Embed(title="Start Game",
-                       description="Starts a new game of connect four, overwiting any game that was previously being "
+                       description="Starts a new game of connect four, overwriting any game that was previously being "
                                    "played.",
                        color=ctx.author.color)
     em.add_field(name="**Syntax**",
