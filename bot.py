@@ -15,7 +15,7 @@ intents.members = True
 
 # Loading the .env file and getting the token and the line to print to the console.
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('/token.env/DISCORD_TOKEN')
 LINE = os.getenv('CONSOLE_LINE')
 
 

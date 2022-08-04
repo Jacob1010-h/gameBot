@@ -42,7 +42,7 @@ detection_kernels = [horizontal_kernel, vertical_kernel, diag1_kernel, diag2_ker
 
 # It's loading the .env file and getting the token and the console line.
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('/token.env/DISCORD_TOKEN')
 LINE = os.getenv('CONSOLE_LINE')
 
 

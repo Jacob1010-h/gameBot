@@ -5,7 +5,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('/token.env/DISCORD_TOKEN')
 LINE = os.getenv('CONSOLE_LINE')
 
 
